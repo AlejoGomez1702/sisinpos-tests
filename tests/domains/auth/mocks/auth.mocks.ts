@@ -121,6 +121,17 @@ export async function interceptCheckStatus(page: Page) {
   return () => called;
 }
 
+export async function mockCheckStatusSuccessWithDelay(page: Page, delayMs = 500) {
+  await page.route('**/auth/me', async (route) => {
+    await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(buildLoginResponse()),
+    });
+  });
+}
+
 export async function mockCheckStatusWithoutEstablishment(page: Page) {
   await page.route('**/auth/me', async (route) => {
     await route.fulfill({

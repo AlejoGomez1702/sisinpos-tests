@@ -79,8 +79,20 @@ test.describe('Guards - Real @real @auth-real', () => {
       await loginWithCredentials(page, identifier!, password!);
       await expect(page).toHaveURL(/\/dashboard/);
 
-      // Browser back → notAuthenticatedGuard evalúa → authStatus='authenticated' → redirect
       await page.goBack();
+
+      await expect(page).toHaveURL(/\/dashboard/);
+    });
+
+    test('debe redirigir a /dashboard cuando ADMIN intenta acceder a /super-dashboard', async ({
+      page,
+    }) => {
+      skipIfNoCredentials(test);
+      await loginWithCredentials(page, identifier!, password!);
+      await expect(page).toHaveURL(/\/dashboard/);
+
+      // superAdminGuard: ADMIN_ROLE → resolvePostLoginRoute → /dashboard
+      await page.goto('/super-dashboard');
 
       await expect(page).toHaveURL(/\/dashboard/);
     });

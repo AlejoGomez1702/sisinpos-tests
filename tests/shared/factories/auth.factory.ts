@@ -1,5 +1,6 @@
 export type LoginResponseOverride = {
-  establishment?: Record<string, unknown> | undefined;
+  establishment?: Record<string, unknown> | null;
+  rol?: string;
 };
 
 export function buildLoginResponse(override: LoginResponseOverride = {}) {
@@ -14,14 +15,14 @@ export function buildLoginResponse(override: LoginResponseOverride = {}) {
         username: 'qa.user',
         email: 'qa@sisinpos.com',
         cellphone: '3000000000',
-        rol: 'ADMIN_ROLE',
+        rol: override.rol ?? 'ADMIN_ROLE',
         permissions: ['clients.canRead'],
         establishment: withEstablishment
           ? override.establishment
           : {
               id: 'est-1',
               name: 'Mi Negocio',
-              type: 'STORE',
+              type: 'TIENDA',
               updated_at: '2026-01-01T00:00:00.000Z',
             },
         created_at: '2026-01-01T00:00:00.000Z',

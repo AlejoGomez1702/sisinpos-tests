@@ -93,6 +93,17 @@ test.describe('Onboarding de Establecimiento @mocked @auth-mocked', () => {
       await expect(page).toHaveURL(/\/auth\/register-establishment/);
       await expect(page.getByText(/nombre|establecimiento|existe|registrado/i)).toBeVisible();
     });
+
+    test('debe limpiar localStorage y redirigir a /auth/login al cerrar sesión', async ({
+      registeredPage: page,
+    }) => {
+      await page.getByRole('button', { name: /cerrar sesi[oó]n/i }).click();
+
+      await expect(page).toHaveURL(/\/auth\/login/);
+      expect(await page.evaluate(() => localStorage.getItem('x-token'))).toBeNull();
+      expect(await page.evaluate(() => localStorage.getItem('user_data'))).toBeNull();
+      expect(await page.evaluate(() => localStorage.getItem('establishment_data'))).toBeNull();
+    });
   });
 
   // ── Guard de establecimiento ───────────────────────────────────────────────

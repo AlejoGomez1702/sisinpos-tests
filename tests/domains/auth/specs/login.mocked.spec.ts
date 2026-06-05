@@ -168,6 +168,24 @@ test.describe('Auth Domain - Login Mocked @mocked @auth-mocked', () => {
     await expect(loginPage.submitButton).toBeEnabled();
   });
 
+  test('debe redirigir a /super-dashboard cuando SUPER_ADMIN inicia sesión', async ({ page }) => {
+    await mockLoginSuccess(page, { rol: 'SUPER_ADMIN_ROLE', establishment: null });
+
+    await submitLoginForm(page, authUsers.validAdmin.identifier, authUsers.validAdmin.password);
+
+    await expect(page).toHaveURL(/\/super-dashboard/);
+  });
+
+  test('debe redirigir a /auth/register-establishment cuando ADMIN no tiene establecimiento', async ({
+    page,
+  }) => {
+    await mockLoginSuccess(page, { establishment: null });
+
+    await submitLoginForm(page, authUsers.validAdmin.identifier, authUsers.validAdmin.password);
+
+    await expect(page).toHaveURL(/\/auth\/register-establishment/);
+  });
+
   test('debe permitir reintentar tras un intento fallido', async ({ page }) => {
     const loginPage = new LoginPage(page);
 

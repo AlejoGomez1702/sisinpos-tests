@@ -53,13 +53,28 @@ test.describe('Onboarding de Establecimiento Real @real @auth-real', () => {
   }) => {
     const user = buildUniqueUser();
 
-    // Registro exitoso: queda en /auth/register-establishment, sin establecimiento
     await submitRegisterForm(page, user, { goto: true });
     await expect(page).toHaveURL(/\/auth\/register-establishment/);
 
-    // Intenta acceder directamente a /dashboard (recarga — authGuard + establishmentGuard)
     await page.goto('/dashboard');
 
     await expect(page).toHaveURL(/\/auth\/register-establishment/);
+  });
+
+  // ── Logout desde onboarding ───────────────────────────────────────────────
+
+  test('debe limpiar localStorage y redirigir a /auth/login al cerrar sesión desde el onboarding', async ({
+    page,
+  }) => {
+    const user = buildUniqueUser();
+
+    await submitRegisterForm(page, user, { goto: true });
+    await expect(page).toHaveURL(/\/auth\/register-establishment/);
+
+    await page.getByRole('button', { name: /cerrar sesi[oó]n/i }).click();
+
+    await expect(page).toHaveURL(/\/auth\/login/);
+    expect(await page.evaluate(() => localStorage.getItem('x-token'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('user_data'))).toBeNull();
   });
 });
