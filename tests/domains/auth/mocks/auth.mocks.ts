@@ -78,3 +78,40 @@ export async function mockNetworkError(page: Page) {
     await route.abort('failed');
   });
 }
+
+// --- check-status (GET /auth/me) ---
+
+export async function mockCheckStatusSuccess(page: Page) {
+  await page.route('**/auth/me', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(buildLoginResponse()),
+    });
+  });
+}
+
+export async function mockCheckStatusUnauthorized(page: Page) {
+  await page.route('**/auth/me', async (route) => {
+    await route.fulfill({
+      status: 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'Token inválido o expirado' }),
+    });
+  });
+}
+
+export async function mockCheckStatusNetworkError(page: Page) {
+  await page.route('**/auth/me', async (route) => {
+    await route.abort('failed');
+  });
+}
+
+export async function interceptCheckStatus(page: Page) {
+  let called = false;
+  await page.route('**/auth/me', async (route) => {
+    called = true;
+    await route.continue();
+  });
+  return () => called;
+}
