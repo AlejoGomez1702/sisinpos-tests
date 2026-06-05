@@ -1,13 +1,7 @@
-import { expect, type Page, test } from '@playwright/test';
+import { expect, test } from '../../../shared/fixtures/base.fixture';
+import { expectPublicArea } from '../../../shared/utils/auth.assertions';
 
-async function expectPublicArea(page: Page) {
-  const hasLoginForm = (await page.getByLabel('Correo o usuario').count()) > 0;
-  const hasLoginButton = (await page.getByRole('button', { name: /iniciar sesi[oó]n/i }).count()) > 0;
-
-  expect(hasLoginForm || hasLoginButton).toBeTruthy();
-}
-
-test.describe('Auth - Guards y Rutas Protegidas @auth-mocked', () => {
+test.describe('Auth - Guards y Rutas Protegidas @mocked @auth-mocked', () => {
   test('debe redirigir a login cuando se intenta acceder a ruta protegida sin sesión', async ({
     page,
   }) => {

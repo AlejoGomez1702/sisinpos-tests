@@ -1,7 +1,8 @@
 import { expect, test } from '../../../shared/fixtures/base.fixture';
 import { submitLoginForm } from '../flows/login.flow';
 import { LoginPage } from '../pages/login.page';
-import { mockLoginCapturePayload, mockLoginStatus, mockLoginSuccess } from '../mocks/auth.mocks';
+import { mockLoginCapturePayload, mockLoginStatus, mockLoginSuccess, mockNetworkError } from '../mocks/auth.mocks';
+import { authUsers } from '../data/users';
 
 test.describe('Auth Domain - Login Mocked @mocked @auth-mocked', () => {
   test.beforeEach(async ({ page }) => {
@@ -146,5 +147,40 @@ test.describe('Auth Domain - Login Mocked @mocked @auth-mocked', () => {
     await submitLoginForm(page, 'qa@sisinpos.com', '123456', { remember: false });
 
     await expect.poll(() => getPayload()?.remember).toBe(false);
+  });
+
+  test('debe enviar identifier y password correctos en el payload', async ({ page }) => {
+    const getPayload = await mockLoginCapturePayload(page);
+
+    await submitLoginForm(page, authUsers.validAdmin.identifier, authUsers.validAdmin.password);
+
+    await expect.poll(() => getPayload()?.identifier).toBe(authUsers.validAdmin.identifier);
+    await expect.poll(() => getPayload()?.password).toBe(authUsers.validAdmin.password);
+  });
+
+  test('debe manejar error de red de forma controlada', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await mockNetworkError(page);
+
+    await submitLoginForm(page, authUsers.validAdmin.identifier, authUsers.validAdmin.password);
+
+    await expect(page).toHaveURL(/\/auth\/login$/);
+    await expect(loginPage.submitButton).toBeEnabled();
+  });
+
+  test('debe permitir reintentar tras un intento fallido', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+
+    await mockLoginStatus(page, 401, 'Credenciales inválidas');
+    await submitLoginForm(page, authUsers.invalidUser.identifier, authUsers.invalidUser.password);
+    await expect(page.getByText('Usuario o contraseña incorrectos.')).toBeVisible();
+    await expect(loginPage.submitButton).toBeEnabled();
+
+    // El mock registrado de último tiene precedencia — el siguiente intento tendrá éxito
+    await mockLoginSuccess(page);
+    await loginPage.fillCredentials(authUsers.validAdmin.identifier, authUsers.validAdmin.password);
+    await loginPage.submit();
+
+    await expect(page).toHaveURL(/\/dashboard/);
   });
 });

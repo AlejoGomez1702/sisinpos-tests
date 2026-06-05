@@ -45,3 +45,36 @@ export async function mockLoginCapturePayload(page: Page) {
 
   return () => payload;
 }
+
+export async function mockLoginWithRateLimit(
+  page: Page,
+  { failBefore = 3 }: { failBefore?: number } = {}
+) {
+  let attempts = 0;
+
+  await page.route('**/auth/login', async (route) => {
+    attempts += 1;
+
+    if (attempts < failBefore) {
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Credenciales inválidas' }),
+      });
+    } else {
+      await route.fulfill({
+        status: 429,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Demasiados intentos. Intenta más tarde.' }),
+      });
+    }
+  });
+
+  return () => attempts;
+}
+
+export async function mockNetworkError(page: Page) {
+  await page.route('**/auth/login', async (route) => {
+    await route.abort('failed');
+  });
+}
