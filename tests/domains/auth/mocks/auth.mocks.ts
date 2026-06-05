@@ -111,7 +111,64 @@ export async function interceptCheckStatus(page: Page) {
   let called = false;
   await page.route('**/auth/me', async (route) => {
     called = true;
-    await route.continue();
+    // fulfill en lugar de continue para evitar errores de red en suites sin backend
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(buildLoginResponse()),
+    });
   });
   return () => called;
+}
+
+export async function mockCheckStatusWithoutEstablishment(page: Page) {
+  await page.route('**/auth/me', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: {
+          token: 'fake-jwt-token',
+          user: {
+            id: 'user-reg-1',
+            name: 'QA Registro',
+            username: 'qa.registro',
+            email: 'qa.registro@sisinpos.com',
+            cellphone: '3100000000',
+            rol: 'ADMIN_ROLE',
+            permissions: [],
+            establishment: null,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          },
+        },
+      }),
+    });
+  });
+}
+
+export async function mockCheckStatusSuperAdmin(page: Page) {
+  await page.route('**/auth/me', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: {
+          token: 'fake-jwt-token',
+          user: {
+            id: 'user-super-1',
+            name: 'QA Super Admin',
+            username: 'qa.superadmin',
+            email: 'qa.superadmin@sisinpos.com',
+            cellphone: '3100000000',
+            rol: 'SUPER_ADMIN_ROLE',
+            permissions: ['*'],
+            establishment: null,
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+          },
+        },
+      }),
+    });
+  });
 }

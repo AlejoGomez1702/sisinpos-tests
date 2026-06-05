@@ -6,6 +6,7 @@ import {
   mockRegisterStatus,
   mockRegisterSuccess,
 } from '../mocks/register.mocks';
+import { interceptCheckStatus } from '../mocks/auth.mocks';
 import { registerUsers } from '../data/register.data';
 
 test.describe('Auth - Registro @mocked @auth-mocked', () => {
@@ -143,15 +144,25 @@ test.describe('Auth - Registro @mocked @auth-mocked', () => {
     await expect(page).toHaveURL(/\/auth\/register-establishment/);
   });
 
-  test('debe almacenar el token en localStorage bajo la clave x-token', async ({ page }) => {
+  test('debe almacenar token y user_data en localStorage sin llamar a /auth/me', async ({
+    page,
+  }) => {
+    const wasCheckStatusCalled = await interceptCheckStatus(page);
     await mockRegisterSuccess(page, { token: 'fake-jwt-token' });
 
     await submitRegisterForm(page, registerUsers.valid);
 
     await expect(page).toHaveURL(/\/auth\/register-establishment/);
+
     const token = await page.evaluate(() => localStorage.getItem('x-token'));
-    expect(token).toBeTruthy();
     expect(token).toBe('fake-jwt-token');
+
+    const rawUserData = await page.evaluate(() => localStorage.getItem('user_data'));
+    expect(rawUserData).toBeTruthy();
+    const userData = JSON.parse(rawUserData!);
+    expect(userData.establishment).toBeNull();
+
+    expect(wasCheckStatusCalled()).toBe(false);
   });
 
   test('debe enviar el payload correcto al backend sin incluir repeatPassword ni términos', async ({
