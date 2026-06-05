@@ -1,0 +1,26 @@
+{
+  "name": "sisinpos-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test:all": "playwright test --project=chromium-mocked --project=chromium-real",
+    "test:all:ui": "playwright test --ui --project=chromium-mocked --project=chromium-real",
+    "test:smoke": "playwright test --project=chromium-smoke",
+    "test:auth-mocked": "playwright test tests/domains/auth/specs/login.mocked.spec.ts --project=chromium-mocked",
+    "test:auth-mocked:ui": "playwright test tests/domains/auth/specs/login.mocked.spec.ts --project=chromium-mocked --ui",
+    "test:auth-real": "playwright test tests/domains/auth/specs/login.real.spec.ts --project=chromium-real",
+    "test:auth-real:ui": "playwright test tests/domains/auth/specs/login.real.spec.ts --project=chromium-real --ui",
+    "test:auth-real:headed": "playwright test tests/domains/auth/specs/login.real.spec.ts --project=chromium-real --headed",
+    "test:auth-real:debug": "playwright test tests/domains/auth/specs/login.real.spec.ts --project=chromium-real --headed --debug"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.9.1",
+    "dotenv": "^17.4.2"
+  }
+}
