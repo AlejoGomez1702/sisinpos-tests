@@ -47,9 +47,15 @@ test.describe('Auth - Registro Real @real @auth-real', () => {
     const registerPage = new RegisterPage(page);
     const user = buildUniqueUser();
 
-    // Primer registro — debe exitoso
+    // Primer registro — debe ser exitoso
     await submitRegisterForm(page, user, { goto: true });
     await expect(page).toHaveURL(/\/auth\/register-establishment/);
+
+    // Cerrar sesión: sin token el guard no intercepta la navegación a /auth/register
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
 
     // Segundo intento con el mismo email — debe fallar
     await registerPage.goto();
@@ -116,6 +122,12 @@ test.describe('Auth - Registro Real @real @auth-real', () => {
     // Primer registro — debe ser exitoso
     await submitRegisterForm(page, firstUser, { goto: true });
     await expect(page).toHaveURL(/\/auth\/register-establishment/);
+
+    // Cerrar sesión: sin token el guard no intercepta la navegación a /auth/register
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
 
     // Segundo intento con mismo username pero email diferente
     const ts = Date.now();
