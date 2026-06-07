@@ -67,6 +67,48 @@ test.describe('Auth - Registro Real @real @auth-real', () => {
     await expect(page.getByText(/correo|email|ya está|registrado|duplicado/i)).toBeVisible();
   });
 
+  // ── Guards post-registro ───────────────────────────────────────────────────
+  // Verifica que los guards protegen las rutas después de un registro real.
+  // Cada test crea un usuario único para ser independiente.
+
+  test.describe('guards post-registro', () => {
+    test('debe redirigir a register-establishment cuando intenta ir a /dashboard', async ({
+      page,
+    }) => {
+      const user = buildUniqueUser();
+      await submitRegisterForm(page, user, { goto: true });
+      await expect(page).toHaveURL(/\/auth\/register-establishment/);
+
+      await page.goto('/dashboard');
+
+      await expect(page).toHaveURL(/\/auth\/register-establishment/);
+    });
+
+    test('debe redirigir a register-establishment cuando intenta ir a /super-dashboard', async ({
+      page,
+    }) => {
+      const user = buildUniqueUser();
+      await submitRegisterForm(page, user, { goto: true });
+      await expect(page).toHaveURL(/\/auth\/register-establishment/);
+
+      await page.goto('/super-dashboard');
+
+      await expect(page).toHaveURL(/\/auth\/register-establishment/);
+    });
+
+    test('debe redirigir a register-establishment cuando intenta ir a /auth/login', async ({
+      page,
+    }) => {
+      const user = buildUniqueUser();
+      await submitRegisterForm(page, user, { goto: true });
+      await expect(page).toHaveURL(/\/auth\/register-establishment/);
+
+      await page.goto('/auth/login');
+
+      await expect(page).toHaveURL(/\/auth\/register-establishment/);
+    });
+  });
+
   test('debe mostrar error al intentar registrar un username ya existente', async ({ page }) => {
     const registerPage = new RegisterPage(page);
     const firstUser = buildUniqueUser();

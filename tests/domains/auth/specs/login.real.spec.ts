@@ -5,6 +5,12 @@ import { LoginPage } from '../pages/login.page';
 const identifier = process.env.AUTH_REAL_IDENTIFIER;
 const password = process.env.AUTH_REAL_PASSWORD;
 
+const employeeIdentifier = process.env.AUTH_REAL_EMPLOYEE_IDENTIFIER;
+const employeePassword = process.env.AUTH_REAL_EMPLOYEE_PASSWORD;
+
+const superAdminIdentifier = process.env.AUTH_REAL_SUPER_ADMIN_IDENTIFIER;
+const superAdminPassword = process.env.AUTH_REAL_SUPER_ADMIN_PASSWORD;
+
 const skipIfNoCredentials = (t: typeof test) =>
   t.skip(
     !identifier || !password,
@@ -54,6 +60,24 @@ test.describe('Auth Domain - Login Real @real @auth-real', () => {
     await page.reload();
 
     await expect(page).toHaveURL(/\/dashboard/);
+  });
+
+  test('debe redirigir al dashboard cuando un empleado (USER_ROLE) inicia sesión', async ({ page }) => {
+    test.skip(
+      !employeeIdentifier || !employeePassword,
+      'Define AUTH_REAL_EMPLOYEE_IDENTIFIER y AUTH_REAL_EMPLOYEE_PASSWORD para ejecutar este test.'
+    );
+    await loginWithCredentials(page, employeeIdentifier!, employeePassword!);
+    await expect(page).toHaveURL(/\/dashboard/);
+  });
+
+  test('debe redirigir a /super-dashboard cuando un super administrador inicia sesión', async ({ page }) => {
+    test.skip(
+      !superAdminIdentifier || !superAdminPassword,
+      'Define AUTH_REAL_SUPER_ADMIN_IDENTIFIER y AUTH_REAL_SUPER_ADMIN_PASSWORD para ejecutar este test.'
+    );
+    await loginWithCredentials(page, superAdminIdentifier!, superAdminPassword!);
+    await expect(page).toHaveURL(/\/super-dashboard/);
   });
 
   test('debe redirigir a login cuando el token es eliminado manualmente', async ({ page }) => {

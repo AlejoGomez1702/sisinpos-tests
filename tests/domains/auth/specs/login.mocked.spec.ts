@@ -34,6 +34,14 @@ test.describe('Auth Domain - Login Mocked @mocked @auth-mocked', () => {
     await expect(page.getByText('Sede Norte')).toBeVisible();
   });
 
+  test('debe redirigir al dashboard cuando un empleado (USER_ROLE) inicia sesión con establecimiento', async ({ page }) => {
+    await mockLoginSuccess(page, { rol: 'USER_ROLE' });
+
+    await submitLoginForm(page, authUsers.validAdmin.identifier, authUsers.validAdmin.password);
+
+    await expect(page).toHaveURL(/\/dashboard/);
+  });
+
   test('debe mantener sesion segun configuracion esperada del producto', async ({ page }) => {
     await mockLoginSuccess(page);
 

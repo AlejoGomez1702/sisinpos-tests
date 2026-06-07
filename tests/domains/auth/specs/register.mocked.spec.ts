@@ -222,4 +222,20 @@ test.describe('Auth - Registro @mocked @auth-mocked', () => {
 
     await expect(page).toHaveURL(/\/auth\/register-establishment/);
   });
+
+  // ── Guards post-registro ───────────────────────────────────────────────────
+
+  test('debe redirigir a /auth/register-establishment cuando el usuario registrado intenta volver al formulario de registro', async ({
+    page,
+  }) => {
+    await mockRegisterSuccess(page);
+    await submitRegisterForm(page, registerUsers.valid, { goto: true });
+    await expect(page).toHaveURL(/\/auth\/register-establishment/);
+
+    // page.goBack() dispara popstate → SPA navigation, Angular mantiene el estado en memoria
+    // notAuthenticatedGuard: authStatus 'authenticated', sin establecimiento → /auth/register-establishment
+    await page.goBack();
+
+    await expect(page).toHaveURL(/\/auth\/register-establishment/);
+  });
 });
